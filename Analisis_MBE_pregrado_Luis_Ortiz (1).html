@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía Resultados: Evaluación diagnóstica respecto de uso de MBE en estudiantes de pregrado Mecina-UC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F3F4F6; /* Cool Gray 100 */
+            color: #334155; /* Slate 700 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* Increased max-width for more horizontal space */
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px; /* Increased default height */
+            max-height: 500px; /* Increased max height */
+            padding: 1rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px; /* Increased height for md breakpoint */
+                max-height: 600px; /* Increased max height for md breakpoint */
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: bold;
+            color: #0D9488; /* Teal 600 */
+        }
+        .stat-label {
+            font-size: 0.875rem; /* text-sm */
+            color: #475569; /* Slate 600 */
+            margin-top: 0.25rem;
+        }
+        .section-title {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: bold;
+            color: #0D9488; /* Teal 600 */
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #F97316; /* Orange 500 */
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); /* shadow-lg */
+        }
+        .question-text {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #1E293B; /* Slate 800 */
+            margin-bottom: 0.75rem; /* mb-3 */
+        }
+        .correct-answer-text {
+            font-size: 0.95rem; /* slightly larger than sm */
+            color: #059669; /* Emerald 600 */
+            background-color: #D1FAE5; /* Emerald 100 */
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem; /* rounded-md */
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .context-text {
+            font-size: 0.875rem; /* text-sm */
+            color: #475569; /* Slate 600 */
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="py-8 md:py-12 bg-gradient-to-r from-teal-600 to-emerald-600 text-white text-center shadow-md">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold">Resultados Destacados: Evaluación MBE</h1>
+            <p class="mt-2 text-lg md:text-xl opacity-90">Análisis visual del rendimiento de 98 participantes.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <section id="panorama-general" class="mb-12 md:mb-16">
+            <h2 class="section-title text-center">Panorama General</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8">
+                <div class="stat-card md:col-span-1">
+                    <div class="stat-number">98</div>
+                    <div class="stat-label">Participantes Totales</div>
+                    <p class="text-xs text-slate-500 mt-2">Estudiantes evaluados.</p>
+                </div>
+                <div class="stat-card md:col-span-2 chart-container !max-w-full !h-[250px] md:!h-[300px]">
+                    <canvas id="avgCorrectChart"></canvas>
+                    <p class="text-xs text-slate-500 mt-2 text-center">Promedio de respuestas correctas (Preguntas 1-9).</p>
+                </div>
+            </div>
+            <div class="mt-8 md:mt-12">
+                 <p class="context-text text-center mb-4">A continuación, se muestra el porcentaje de respuestas correctas para cada una de las primeras nueve preguntas. Esto permite una comparación rápida del desempeño general en los diferentes temas evaluados.</p>
+                <div class="chart-container !h-[350px] md:!h-[400px]">
+                    <canvas id="correctPerQuestionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="analisis-detallado">
+            <h2 class="section-title text-center">Análisis Detallado por Pregunta</h2>
+            
+            <div id="questionsContainer" class="space-y-8">
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 mt-8 border-t border-slate-300">
+        <p class="text-sm text-slate-500">© 2025 Análisis de Resultados Evaluación Diagnóstica MBE pregrado - Jefe de módulo: Luis Ortiz Muñoz</p>
+    </footer>
+
+    <script>
+        const reportData = {
+            totalParticipants: 98,
+            questions: [
+                {
+                    id: "q1",
+                    text: "1.- ¿Por qué es necesario buscar información en el ámbito clínico, según la MBE?",
+                    correctAnswer: "Identificar la mejor evidencia disponible.",
+                    correctCount: 7,
+                    distribution: [
+                        { answer: "Identificar la mejor evidencia disponible.", count: 7 },
+                        { answer: "Mejorar la práctica clínica.", count: 3 },
+                        { answer: "Responder una necesidad informativa.", count: 0 },
+                        { answer: "Actualizar la información.", count: 0 },
+                        { answer: "Permitir corroborar información.", count: 0 }
+                    ]
+                },
+                {
+                    id: "q2",
+                    text: "Qué estrategias de búsqueda se consideran apropiadas para tomar decisiones clínicas informadas? (marque las que considere correctas)",
+                    correctAnswer: "Solo I, II y IV",
+                    correctCount: 8,
+                    distribution: [
+                        { answer: "Solo I, II y IV", count: 8 },
+                        { answer: "I, II y III", count: 2 },
+                        { answer: "Solo I y III", count: 0 },
+                        { answer: "Solo II y IV", count: 0 },
+                        { answer: "Ninguna de las anteriores", count: 0 }
+                    ]
+                },
+                {
+                    id: "q3",
+                    text: "3.- ¿Cuáles herramientas de búsqueda utiliza?.",
+                    correctAnswer: "I, III y IV",
+                    correctCount: 9,
+                    distribution: [
+                        { answer: "I, III y IV", count: 9 },
+                        { answer: "I, II y III", count: 1 },
+                        { answer: "I y II", count: 0 },
+                        { answer: "II, IV", count: 0 }
+                    ]
+                },
+                {
+                    id: "q4",
+                    text: "Indique cuál de los siguientes recursos utilizaría para hacer una búsqueda más eficiente dada una pregunta en la que existe mucha información:",
+                    correctAnswer: "Pubmed",
+                    correctCount: 8,
+                    distribution: [
+                        { answer: "Pubmed", count: 8 },
+                        { answer: "Google Scholar", count: 1 },
+                        { answer: "Embase", count: 1 },
+                        { answer: "Bandolier", count: 0 },
+                        { answer: "Metabuscador", count: 0 },
+                        { answer: "Biblioteca Cochrane", count: 0 }
+                    ]
+                },
+                {
+                    id: "q5",
+                    text: "¿Cúal de las siguientes herramientas disponibles en Pubmed/Medline corresponde a un filtro que permite encontrar el tipo de estudio que mejor responde a una pregunta clínica específica:",
+                    correctAnswer: "Clinical queries",
+                    correctCount: 8,
+                    distribution: [
+                        { answer: "Clinical queries", count: 8 },
+                        { answer: "MeSH terms", count: 2 },
+                        { answer: "Limits", count: 0 },
+                        { answer: "My NCBI", count: 0 },
+                        { answer: "MeSH database", count: 0 }
+                    ]
+                },
+                {
+                    id: "q6",
+                    text: "¿CUÁL ES LA POBLACIÓN?",
+                    correctAnswer: "Adultos jóvenes con síntomas compatibles con sinusitis aguda",
+                    correctCount: 7,
+                    distribution: [
+                        { answer: "Adultos jóvenes con síntomas compatibles con sinusitis aguda", count: 7 },
+                        { answer: "Población general", count: 1 },
+                        { answer: "Niños con tos", count: 1 },
+                        { answer: "Adultos mayores", count: 1 },
+                        { answer: "Pacientes mayores de 60 años con enfermedades respiratorias crónicas", count: 0 },
+                        { answer: "Niños menores de 5 años con infecciones de vías respiratorias altas", count: 0 },
+                        { answer: "Personas inmunocomprometidas con sospecha de sinusitis crónica", count: 0 }
+                    ]
+                },
+                {
+                    id: "q7",
+                    text: "¿CUÁL ES LA ACCIÓN O INTERVENCIÓN QUE SE ESTÁ CONSIDERANDO?",
+                    correctAnswer: "Prescripción empírica de antibióticos", // Corrected answer based on provided list
+                    correctCount: 7, // Assuming count for this answer is 7
+                    distribution: [
+                        { answer: "Solicitud de radiografía de senos paranasales", count: 7 },
+                        { answer: "Examen físico", count: 1 },
+                        { answer: "Antibióticos", count: 1 },
+                        { answer: "Observación", count: 1 },
+                        { answer: "Prescripción empírica de antibióticos", count: 0 },
+                        { answer: "Derivación a otorrinolaringología", count: 0 },
+                        { answer: "Uso de corticoides intranasales", count: 0 }
+                    ]
+                },
+                {
+                    id: "q8",
+                    text: "¿Cuál sería una posible Comparación en este caso?",
+                    correctAnswer: "No realizar examen de imágenes y basar el diagnóstico solo en la evaluación clínica",
+                    correctCount: 8,
+                    distribution: [
+                        { answer: "No realizar examen de imágenes y basar el diagnóstico solo en la evaluación clínica", count: 8 },
+                        { answer: "Realizar examen de imágenes", count: 2 },
+                        { answer: "Solicitar tomografía computada en vez de radiografía", count: 0 },
+                        { answer: "Usar antihistamínicos en lugar de antibióticos", count: 0 },
+                        { answer: "Comparar con pacientes sin síntomas", count: 0 }
+                    ]
+                },
+                {
+                    id: "q9",
+                    text: "¿Cuál es el Desenlace que motiva la decisión del clínico?",
+                    correctAnswer: "Confirmar el diagnóstico de sinusitis aguda",
+                    correctCount: 8,
+                    distribution: [
+                        { answer: "Confirmar el diagnóstico de sinusitis aguda", count: 8 },
+                        { answer: "Reducir costos", count: 1 },
+                        { answer: "Curar la enfermedad", count: 1 },
+                        { answer: "Determinar si hay resistencia bacteriana", count: 0 },
+                        { answer: "Evitar complicaciones intracraneales", count: 0 },
+                        { answer: "Tratar eficazmente la fiebre", count: 0 }
+                    ]
+                },
+                {
+                    id: "q10",
+                    text: "¿Emplea alguna herramienta de inteligencia artificial para responder preguntas clínicas / \"en salud\"? (Seleccione todas las que correspondan)",
+                    correctAnswer: null,
+                    correctCount: null,
+                    isMultipleSelection: true,
+                    distribution: [
+                        { answer: "ChatGPT", count: 58 },
+                        { answer: "UpToDate con IA (por ejemplo, funciones de búsqueda inteligente)", count: 66 },
+                        { answer: "OpenEvidence", count: 55 },
+                        { answer: "Glass Health", count: 3 },
+                        { answer: "Consensus", count: 8 },
+                        { answer: "Perplexity AI", count: 4 },
+                        { answer: "Gemini", count: 5 },
+                        { answer: "IA de Bing", count: 1 },
+                        { answer: "NotebookLM", count: 2 },
+                        { answer: "Scispace", count: 1 },
+                        { answer: "Elementos Propios", count: 1 },
+                        { answer: "ClinicalKey", count: 1 }
+                    ]
+                }
+            ]
+        };
+
+        const primaryColor = '#0D9488'; // Teal 600
+        const secondaryColor = '#F97316'; // Orange 500
+        const accentColor = '#F59E0B'; // Amber 500
+        const neutralColor = '#64748B'; // Slate 500
+        const correctColor = '#10B981'; // Emerald 500
+        const incorrectColor = '#EF4444'; // Red 500
+        const otherOptionColor = '#60A5FA'; // Blue 400
+
+        function wrapLabel(str, maxWidth = 16) {
+            if (!str) return [''];
+            const words = str.split(' ');
+            let currentLine = '';
+            const lines = [];
+            words.forEach(word => {
+                if ((currentLine + word).length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            lines.push(currentLine.trim());
+            return lines.filter(line => line.length > 0);
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const totalCorrectCounts = reportData.questions.slice(0, 9).reduce((sum, q) => sum + q.correctCount, 0);
+            const totalPossibleCorrects = reportData.totalParticipants * 9;
+            const averageCorrectPercentage = totalPossibleCorrects > 0 ? (totalCorrectCounts / totalPossibleCorrects) * 100 : 0;
+
+            new Chart(document.getElementById('avgCorrectChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correctas', 'Incorrectas/No Respondidas'],
+                    datasets: [{
+                        data: [averageCorrectPercentage, 100 - averageCorrectPercentage],
+                        backgroundColor: [correctColor, incorrectColor],
+                        borderColor: ['#FFFFFF'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Promedio Aciertos (P1-P9)', font: { size: 14 } },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const correctPerQuestionLabels = reportData.questions.slice(0, 9).map((q, i) => `P${i + 1}`);
+            const correctPerQuestionData = reportData.questions.slice(0, 9).map(q => (q.correctCount / reportData.totalParticipants) * 100);
+            new Chart(document.getElementById('correctPerQuestionChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: correctPerQuestionLabels,
+                    datasets: [{
+                        label: '% Respuestas Correctas',
+                        data: correctPerQuestionData,
+                        backgroundColor: primaryColor,
+                        borderColor: primaryColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + "%" }, title: { display: true, text: 'Porcentaje (%)' } } },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: '% Aciertos por Pregunta (P1-P9)', font: { size: 14 } },
+                        tooltip: { callbacks: { title: tooltipTitleCallback, label: (context) => `${context.dataset.label}: ${context.raw.toFixed(2)}%` } }
+                    }
+                }
+            });
+
+            const questionsContainer = document.getElementById('questionsContainer');
+            reportData.questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-card';
+                
+                const correctPercentage = q.correctCount !== null ? ((q.correctCount / reportData.totalParticipants) * 100).toFixed(2) : null;
+
+                let chartHtml = '';
+                if (q.distribution) {
+                    chartHtml = `<div class="chart-container !h-[300px] md:!h-[350px] mt-4">
+                                    <canvas id="chart-q${index + 1}"></canvas>
+                                 </div>`;
+                }
+                
+                let questionTitlePrefix = `Pregunta ${index + 1}`;
+                // Remove the leading number and dot from the question text for the concise title
+                const cleanedQuestionText = q.text.replace(/^\d+\.-\s*/, '').trim();
+                let conciseQuestionText;
+                if (cleanedQuestionText.length > 60) {
+                    // Find a space near the 40-character mark to make a clean break
+                    const breakPoint = cleanedQuestionText.indexOf(' ', 40);
+                    conciseQuestionText = cleanedQuestionText.substring(0, breakPoint !== -1 ? breakPoint : 60) + '...';
+                } else {
+                    conciseQuestionText = cleanedQuestionText;
+                }
+                const displayQuestionTitle = `${questionTitlePrefix}: ${conciseQuestionText}`;
+
+
+                questionDiv.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-1 text-teal-700">${displayQuestionTitle}</h3>
+                    <p class="question-text">${q.text}</p>
+                    ${q.correctAnswer ? `<p class="correct-answer-text">Respuesta Correcta: ${q.correctAnswer}</p>` : ''}
+                    ${q.correctAnswer && correctPercentage !== null ? `<div class="stat-card !p-3 !shadow-none border border-slate-200 inline-block mr-4"><div class="stat-number !text-2xl !text-emerald-600">${correctPercentage}%</div><div class="stat-label !text-xs">Correctas</div></div>` : ''}
+                    <p class="context-text">El siguiente gráfico muestra la distribución de las respuestas de los ${reportData.totalParticipants} estudiantes para esta pregunta. ${q.correctAnswer ? 'La opción correcta se resalta para facilitar el análisis.' : 'Se muestran las frecuencias de cada opción seleccionada.'}</p>
+                    ${chartHtml}
+                `;
+                questionsContainer.appendChild(questionDiv);
+
+                if (q.distribution) {
+                    let dataLabels = [];
+                    let dataCounts = [];
+                    
+                    // Sort distribution to ensure consistent order (e.g., correct answer first or alphabetical)
+                    // For multiple selection, we sort by count descending, then alphabetically
+                    const sortedDistribution = [...q.distribution].sort((a, b) => {
+                        if (q.isMultipleSelection) {
+                            if (b.count !== a.count) return b.count - a.count;
+                            return a.answer.localeCompare(b.answer);
+                        }
+                        // For single choice, keep original order or put correct answer first if desired
+                        return 0; // Maintain original order for single choice
+                    });
+
+
+                    sortedDistribution.forEach(item => {
+                        dataLabels.push(item.answer);
+                        dataCounts.push(item.count);
+                    });
+
+                    const chartBackgroundColors = dataLabels.map(label => {
+                        const originalLabel = Array.isArray(label) ? label.join(' ') : label;
+                        return q.correctAnswer && originalLabel === q.correctAnswer ? correctColor : otherOptionColor;
+                    });
+                     const chartBorderColors = chartBackgroundColors.map(color => color.replace('0.7)', '1)'));
+
+
+                    new Chart(document.getElementById(`chart-q${index + 1}`).getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: dataLabels.map(label => wrapLabel(label, 16)), // Apply label wrapping
+                            datasets: [{
+                                label: q.id === "q10" ? 'Porcentaje de Estudiantes' : 'Número de Estudiantes', // Change label for Q10
+                                data: q.id === "q10" ? dataCounts.map(count => (count / reportData.totalParticipants) * 100) : dataCounts, // Data as percentage for Q10
+                                backgroundColor: chartBackgroundColors,
+                                borderColor: chartBorderColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y', // Set to 'y' for horizontal bars
+                            scales: {
+                                x: { // X-axis now represents counts
+                                    beginAtZero: true,
+                                    title: { display: true, text: q.id === "q10" ? 'Porcentaje (%)' : 'Número de Estudiantes' }, // Change title for Q10
+                                    ticks: {
+                                        callback: function(value) {
+                                            return q.id === "q10" ? value + '%' : value; // Add % for Q10
+                                        }
+                                    }
+                                },
+                                y: { // Y-axis now represents labels
+                                    beginAtZero: true,
+                                    ticks: {
+                                        autoSkip: false, // Prevent skipping labels on horizontal bars
+                                        font: {
+                                            size: 10 // Adjusted font size for y-axis labels
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        title: (tooltipItems) => {
+                                            // Get the full original label for tooltip title
+                                            const item = tooltipItems[0];
+                                            return Array.isArray(item.label) ? item.label.join(' ') : item.label;
+                                        },
+                                        label: (context) => {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (q.id === "q10") {
+                                                return label + context.raw.toFixed(2) + '%'; // Format as percentage for Q10
+                                            }
+                                            return label + context.raw;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
